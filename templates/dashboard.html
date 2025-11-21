@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Tecnológico Futurista</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Configuración de Tailwind -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              neonBlue: '#00ffff',
+              neonPink: '#ff00ff',
+              neonPurple: '#a855f7',
+              darkBg: '#0f111a',
+              cardBg: '#1a1c2b'
+            },
+            fontFamily: {
+              futuristic: ['Orbitron', 'sans-serif']
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- Fuente futurista de Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-darkBg text-white font-futuristic">
+
+    <div class="max-w-7xl mx-auto p-6">
+        <h1 class="text-5xl font-extrabold text-center text-neonBlue mb-12 drop-shadow-neon">Dashboard Tecnológico</h1>
+
+        <!-- ===== BARRA DE INTERACCIÓN ===== -->
+        <div class="flex justify-center gap-4 mb-6">
+            <button id="refreshBtn" class="bg-neonBlue px-4 py-2 rounded-xl hover:bg-neonPink transition">Actualizar Noticias</button>
+            <input type="text" id="searchInput" placeholder="Buscar noticias..." 
+                   class="px-3 py-2 rounded-xl text-gray-900 w-60 focus:outline-none focus:ring-2 focus:ring-neonPink">
+        </div>
+
+        <div class="grid grid-cols-1 gap-8">
+
+            <!-- ===================== NOTICIAS ===================== -->
+            <div id="newsContainer" class="bg-cardBg p-6 rounded-3xl shadow-[0_0_20px_rgba(0,255,255,0.3)] hover:shadow-[0_0_30px_rgba(0,255,255,0.6)] transition duration-500">
+                <h2 class="text-2xl font-bold text-neonPink mb-4 text-center">Noticias Tecnológicas</h2>
+                <ul id="newsList" class="space-y-3">
+                    {% for n in news %}
+                        <li class="p-3 rounded-xl hover:bg-[#0a0c1a] transition">
+                            <a href="{{ n.url }}" target="_blank" class="font-medium hover:text-neonBlue transition">
+                                • {{ n.title }}
+                            </a>
+                            <span class="text-gray-400 text-sm">({{ n.source }})</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- ===================== IMAGEN TECNOLÓGICA ===================== -->
+            <div class="bg-cardBg p-6 rounded-3xl shadow-[0_0_20px_rgba(255,0,255,0.3)] flex flex-col items-center justify-center hover:shadow-[0_0_30px_rgba(255,0,255,0.6)] transition duration-500">
+                <h2 class="text-2xl font-bold text-neonPurple mb-4 text-center">Imagen de Tecnología</h2>
+                <img src="{{ summary }}" 
+                     alt="Imagen tecnológica" 
+                     class="rounded-3xl w-full h-64 md:h-80 object-cover shadow-[0_0_15px_rgba(255,255,255,0.2)]"
+                     onerror="this.src='https://via.placeholder.com/600x400?text=Imagen+no+disponible';">
+            </div>
+
+            <!-- ===================== GADGETS ===================== -->
+            <div class="bg-cardBg p-6 rounded-3xl shadow-[0_0_20px_rgba(0,255,255,0.3)] hover:shadow-[0_0_30px_rgba(0,255,255,0.6)] transition duration-500">
+                <h2 class="text-2xl font-bold text-neonBlue mb-4 text-center">Gadgets Populares</h2>
+                <ul class="space-y-4">
+                    {% for g in gadgets %}
+                        <li class="border-b border-gray-700 pb-3">
+                            <h3 class="text-gray-200 font-semibold">{{ g.title }}</h3>
+                            <p class="text-gray-400 text-sm">Categoría: {{ g.category }}</p>
+                            <p class="text-neonPink text-sm font-bold">Precio: ${{ g.price }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== JS para refrescar y buscar ===== -->
+    <script>
+        // ===== REFRESCAR NOTICIAS =====
+        document.getElementById("refreshBtn").addEventListener("click", async () => {
+            try {
+                const res = await fetch("/api/news-json"); // endpoint que devuelve noticias en JSON
+                const data = await res.json();
+
+                const newsList = document.getElementById("newsList");
+                newsList.innerHTML = "";
+                data.news.forEach(n => {
+                    const li = document.createElement("li");
+                    li.className = "p-3 rounded-xl hover:bg-[#0a0c1a] transition";
+                    li.innerHTML = `<a href="${n.url}" target="_blank" class="font-medium hover:text-neonBlue transition">• ${n.title}</a>
+                                    <span class="text-gray-400 text-sm">(${n.source})</span>`;
+                    newsList.appendChild(li);
+                });
+            } catch (err) {
+                console.error("Error refrescando noticias:", err);
+            }
+        });
+
+        // ===== FILTRAR / BUSCAR NOTICIAS =====
+        document.getElementById("searchInput").addEventListener("input", () => {
+            const query = document.getElementById("searchInput").value.toLowerCase();
+            document.querySelectorAll("#newsList li").forEach(li => {
+                if(li.innerText.toLowerCase().includes(query)) li.style.display = "block";
+                else li.style.display = "none";
+            });
+        });
+    </script>
+
+</body>
+</html>
